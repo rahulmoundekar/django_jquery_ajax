@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>DJango Ajax Post Comments App</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+    <script type='text/javascript'>
+	$(document).ready(
+		function() {
+			$.ajax({
+				type : "GET",
+				url : "comments",
+				dataType : "json",
+				success : function(response) {
+					var messages = JSON.parse(response["messages"]);
+					$.each(messages, function(i, message) {
+							var msg_data = "<div id='msg"+message.pk+"'>"+ message.fields.message + "</div><hr/>";
+							$(msg_data).appendTo("#post-cards");
+					});
+				}
+			});
+				$("#post-message").submit(function (e) {
+					 // preventing from page reload and default actions
+						e.preventDefault();
+					// serialize the data for sending the form data.
+						var serializedData = $(this).serialize();
+					$.ajax({
+						type: 'POST',
+						url: "send",
+						data: serializedData,
+						success : function(response) {
+							var messages = JSON.parse(response["messages"]);
+							var pk = messages[0]["pk"];
+                			var fields = messages[0]["fields"];
+                			$("#id_message").val('');
+							$("#content").prepend("<div id='msg"+pk+"'>"+ fields.message + "</div>");
+							$("#post-cards").focus();
+						},
+						error: function (response) {
+							// alert the error if any error occured
+							alert(response["responseJSON"]["error"]);
+						}
+					});
+					return false;
+				});
+			});
+
+    </script>
+    <style>
+	.alert{
+		position:relative;
+		padding: 0rem 0rem;
+		margin-bottom:1rem;
+	}
+
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <span class="navbar-text">
+    	AJAX in Django
+  </span>
+</nav>
+<div class="container-fluid">
+    <div id="wrapper">
+        <div id="content">
+            <div class="container-fluid">
+                <div class="container">
+                    <div class="container-fluid">
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <!-- Dropdown Card Example -->
+                                <div class="card shadow mb-4">
+                                    <!-- Card Header - Dropdown -->
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Post Messages </h6>
+                                    </div>
+                                    <!-- Card Body -->
+                                    <div class="card-body">
+                                        <form id="post-message">{% csrf_token %}
+                                            <div class="form-group">
+                                                {{ form }}
+                                            </div>
+                                            <button type="submit" class="btn btn-primary col-md-12">Create Post</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr/>
+                    <div class="container-fluid">
+
+                        <div class="row">
+                            <div class="col-lg-12">
+
+                                <!-- Dropdown Card Example -->
+                                <div class="card shadow mb-4">
+                                    <!-- Card Header - Dropdown -->
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-primary">Post Messages </h6>
+                                    </div>
+                                    <!-- Card Body -->
+                                    <div class="card-body">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1"
+                                                 id="post-cards">
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
